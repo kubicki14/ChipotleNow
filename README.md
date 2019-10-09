@@ -1,5 +1,7 @@
 This is a simple application/script that grabs me chipotle from my usual location by pressing buttons and keys.
+
 Arguments that may be provided for chipotle_now.py: (e.g. --m=x, --league, --chips)
+
     - m="DISPLAY1" :-> Monitor name of the primary display you are using. If unsure of the name, don't give this param, & the program will       tell you your options.
     
     - chips :-> defaults to false, if you pass --chips you will get chips.
