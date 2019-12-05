@@ -1,4 +1,4 @@
-autopy==3.0.0
+autopy
 screeninfo==0.4.1
 gTTS==2.0.4
 gTTS-token==1.1.3
