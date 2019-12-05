@@ -12,23 +12,44 @@ SUPPORTED_RESOLUTIONS = ['2560 x 1440', '1920 x 1080']
 
 
 def checkout(guest: bool = False):
-    # TODO: Add new elif for logging in with DIFFERENT credentials than just using cached details from chrome.
     if guest:
-        pass
+        pass  # TODO: Add new elif for logging in with DIFFERENT credentials than just using cached details from chrome.
     else:
         # Use log-in credentials (cached in chrome browser from before)
-        mouse_click(1253.0, 712.0)  # Sign in button (assuming user + pass already cached in chrome
 
+        # Sign in button (assuming user + pass already cached in chrome
+        mouse_click(1268.0, 951.0)  # old values that changed...(1253.0, 712.0)
         # Since were using an account, it has the usual restaurant cached, going to click continue...
         mouse_click(1288.0, 796.0)  # Continue button
-
         mouse_click(1284.0, 949.0)  # Pick up time - Should default to most recent, press continue button again.
-
         autopy.key.tap(key=autopy.key.Code.PAGE_DOWN, modifiers=[])  # Move down the page a bit.
-
         mouse_click(1262.0, 897.0)  # Order Summary - Looks good, press continue again.
-
         mouse_click(1280.0, 1117.0)  # PRESS 'CONFIRM AND PLACE ORDER' (Assume payment information is valid).
+
+
+def minimal_burrito_bowl(chips: bool = False):
+    '''
+    The burrito bowl I eat while cutting weight *fav*
+    :param chips:
+    :return:
+    '''
+    mouse_click(1575.0, 969.0)  # Burrito bowl pic, click
+    sleep(DEFAULT_WAIT)
+
+    mouse_click(1016.0, 837.0)  # chicken
+    autopy.key.tap(key=autopy.key.Code.PAGE_DOWN, modifiers=[])  # Move down the page a bit...
+    mouse_click(997.0, 546.0)  # white rice
+    mouse_click(1000.0, 839.0)  # black beans
+    mouse_click(1362.0, 1151.0)  # fresh tomato salsa - mild
+    autopy.key.tap(key=autopy.key.Code.PAGE_DOWN, modifiers=[])  # Move down the page a bit...
+    if chips:
+        mouse_click(1019.0, 1059.0)  # chips
+
+    mouse_click(1661.0, 794.0)  # 'add meal to bag' button - oldval; Got changed....(1708.0, 864.0)
+    sleep(DEFAULT_WAIT)
+
+    mouse_click(1657.0, 560.0)  # checkout button
+    sleep(DEFAULT_WAIT)
 
 
 def lanes_burrito_bowl(chips: bool = False):
@@ -110,11 +131,11 @@ def finish_yell_at_user():
     finish_text = 'Fuck you asshole chipotle will be ready at {} {} {}'.format(chipotle_ready_time[:2],
                                                                                chipotle_ready_time[3:5], ampm)
     gTTS(text=finish_text, lang='en', slow=False).save('temp.mp3')  # This converts 19:00 -> 7:00pm
-    playsound('temp.mp3')  # TODO: Find way to specify the speaker to use as a parameter...
+    playsound('temp.mp3')
     return finish_text
 
 
-def main(monitor=None, league: bool = False, chips: bool = False, guest: bool = False):
+def main(food_selection: str, monitor=None, league: bool = False, chips: bool = False, guest: bool = False):
     # Initialize
     print('You selected monitor {} with resolution {} x {}!'.format(monitor.name, str(monitor.width),
                                                                     str(monitor.height)))
@@ -122,10 +143,9 @@ def main(monitor=None, league: bool = False, chips: bool = False, guest: bool = 
     autopy.mouse.move(1, 1)
     if monitor.width == 2560 and monitor.height == 1440:
         open_chrome(league=league)
-        # Let it load...(i5-2400 @ 3.1GHz o.o)
         sleep(DEFAULT_WAIT)
         go_to_chipotle()
-        lanes_burrito_bowl(chips=chips)
+        minimal_burrito_bowl(chips) if 'minimal' in food_selection else lanes_burrito_bowl(chips=chips)
         checkout(guest=guest)
         return finish_yell_at_user()
 
@@ -143,25 +163,25 @@ if __name__ == '__main__':
     PREREQS TO USE:
     - A GIANT 2560 x 1440 resolution screen - 1920x1080 coming soon....Mapping TBD
     - Google chrome installed & chipotle acc cached in chrome.
-    - python 3.6.3 + pip install autopy
+    - python 3.x + pip install autopy
     - Windows (mileage may vary)
     
     Credits
     https://www.autopy.org/documentation/api-reference/index.html
     """
     parser = argparse.ArgumentParser(description='Parse arguments for chipotle ordering')
-    parser.add_argument("--m", default=None, type=str, help="Name of a monitor; No input will show options.")
+    parser.add_argument("-food", default='minimal_burrito_bowl', type=str,
+                        help="Explicit address to order from closest chipotle.")
+    parser.add_argument("-m", default=None, type=str, help="Name of a monitor; No input will show options.")
     # TODO: Implement: guest_checkout, then supply address param for guest, then supply cc info for guest checkout.
     # parser.add_argument("--address", default=None, type=str, help="Explicit address to order from closest chipotle.")
-    parser.add_argument("--chips", default=False, action='store_true', help="Whether or not you want to order chips.")
-    parser.add_argument("--league", default=False, action='store_true',
+    parser.add_argument("-chips", default=False, action='store_true', help="Whether or not you want to order chips.")
+    parser.add_argument("-league", default=False, action='store_true',
                         help="Whether or not league of legends is running.")
     args = parser.parse_args()
-
-    playsound('temp.mp3')
 
     # Choose main monitor + resolution for scripting (based on name of monitor)
     selected_monitor = choose_monitor(monitor_name=args.m)
 
-    main(monitor=selected_monitor, league=args.league, chips=args.chips)
+    main(args.food, monitor=selected_monitor, league=args.league, chips=args.chips)
     sys.exit()
